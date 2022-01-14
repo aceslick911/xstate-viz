@@ -92,7 +92,11 @@ export const ActorsPanel: React.FC = () => {
             marginTop="0"
             opacity={currentSessionId === sessionId ? 1 : 0.5}
             onClick={() => {
-              simActor.send({ type: 'SERVICE.FOCUS', sessionId });
+              simActor.send({
+                type: 'SERVICE.FOCUS',
+                sessionId,
+                history: false,
+              });
             }}
             background={
               currentSessionId === sessionId ? 'whiteAlpha.200' : 'transparent'

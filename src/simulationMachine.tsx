@@ -28,6 +28,8 @@ export const simModel = createModel(
     currentSessionId: null as string | null,
     events: [] as SimEvent[],
     previewEvent: undefined as string | undefined,
+    jumpStack: [] as string[],
+    jumpStackForward: [] as string[],
   },
   {
     events: {
@@ -50,10 +52,17 @@ export const simModel = createModel(
       }),
       'SERVICES.UNREGISTER_ALL': () => ({}),
       'SERVICE.STOP': (sessionId: string) => ({ sessionId }),
-      'SERVICE.FOCUS': (sessionId: string) => ({ sessionId }),
+      'SERVICE.FOCUS': (sessionId: string, history?: boolean) => ({
+        sessionId,
+        history: history === undefined ? true : history,
+      }),
+      'SERVICE.FOCUS.CHECK': () => ({}),
+      'SERVICE.FOCUS.BACK': () => ({}),
+      'SERVICE.FOCUS.FORWARD': () => ({}),
       ERROR: (message: string) => ({ message }),
       'LAYOUT.PENDING': () => ({}),
       'LAYOUT.READY': () => ({}),
+      LOG_MESSAGE: () => ({}),
     },
   },
 );
@@ -212,7 +221,42 @@ export const simulationMachine = simModel.createMachine(
               'LAYOUT.READY': 'ready',
             },
           },
-          ready: {},
+          ready: {
+            type: 'parallel',
+
+            states: {
+              goForwards: {
+                initial: 'cant',
+
+                states: {
+                  cant: {
+                    always: {
+                      cond: 'canGoBack',
+                      target: 'can',
+                    },
+                  },
+                  can: {
+                    tags: ['canGoBack'],
+                  },
+                },
+              },
+              goBackwards: {
+                initial: 'cant',
+
+                states: {
+                  cant: {
+                    always: {
+                      cond: 'canGoForward',
+                      target: 'can',
+                    },
+                  },
+                  can: {
+                    tags: ['canGoForward'],
+                  },
+                },
+              },
+            },
+          },
         },
         on: {
           'LAYOUT.PENDING': '.pending',
@@ -312,9 +356,67 @@ export const simulationMachine = simModel.createMachine(
         }),
       },
       'SERVICE.FOCUS': {
-        actions: simModel.assign({
+        actions: [
+          simModel.assign({
+            jumpStack: (c, e) =>
+              e.history === true
+                ? c.jumpStack
+                : [...c.jumpStack, c.currentSessionId as string],
+            jumpStackForward: (c, e) =>
+              e.history === true ? c.jumpStackForward : [],
+          }),
+          simModel.assign({
           currentSessionId: (_, e) => e.sessionId,
         }),
+          send('SERVICE.FOCUS.CHECK'),
+        ],
+      },
+      'SERVICE.FOCUS.BACK': {
+        actions: [
+          send((c, e) => {
+            return {
+              type: 'SERVICE.FOCUS',
+              sessionId: c.jumpStack[c.jumpStack.length - 1],
+              history: true,
+            };
+          }),
+          simModel.assign({
+            jumpStack: (c, e) => {
+              const stack = [...c.jumpStack];
+              stack.pop();
+              return stack;
+            },
+            jumpStackForward: (c, e) => {
+              return [...c.jumpStackForward, c.currentSessionId as string];
+            },
+          }),
+        ],
+        cond: 'canGoBack',
+      },
+      'SERVICE.FOCUS.FORWARD': {
+        actions: [
+          simModel.assign({
+            jumpStack: (c, e) => {
+              return [...c.jumpStack, c.currentSessionId as string];
+            },
+          }),
+          send((c, e) => {
+            return {
+              type: 'SERVICE.FOCUS',
+              sessionId: c.jumpStackForward[c.jumpStackForward.length - 1],
+              history: true,
+            };
+          }),
+
+          simModel.assign({
+            jumpStackForward: (c, e) => {
+              const stack = [...c.jumpStackForward];
+              const lastMachine = stack.pop() as string;
+              return stack;
+            },
+          }),
+        ],
+        cond: 'canGoForward',
       },
       'EVENT.PREVIEW': {
         actions: simModel.assign({
@@ -379,6 +481,11 @@ export const simulationMachine = simModel.createMachine(
         previewEvent: undefined,
         currentSessionId: null,
       }),
+    },
+    guards: {
+      canGoBack: (c: any) => c.jumpStack?.length > 0,
+
+      canGoForward: (c: any) => c.jumpStackForward?.length > 0,
     },
   },
 );

@@ -3,6 +3,8 @@ import {
   MinusIcon,
   RepeatIcon,
   QuestionOutlineIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
 } from '@chakra-ui/icons';
 import {
   Box,
@@ -84,6 +86,12 @@ export const CanvasView: React.FC = () => {
     [embed],
   );
 
+  const tagCanGoBack = useSelector(simService, (state) =>
+    state.hasTag('canGoBack'),
+  );
+  const tagCanGoForward = useSelector(simService, (state) =>
+    state.hasTag('canGoForward'),
+  );
   return (
     <Box
       display="grid"
@@ -125,6 +133,26 @@ export const CanvasView: React.FC = () => {
           width="100%"
           data-testid="controls"
         >
+          <ButtonGroup size="sm" spacing={2} isAttached>
+            <IconButton
+              aria-label="Back to last Machine"
+              title="Back to last Machine"
+              icon={<ArrowLeftIcon />}
+              data-allow={tagCanGoBack}
+              disabled={tagCanGoBack === false}
+              onClick={() => simService.send({ type: 'SERVICE.FOCUS.BACK' })}
+              variant="secondary"
+            />
+            <IconButton
+              aria-label="Back to last Machine"
+              title="Back to last Machine"
+              icon={<ArrowRightIcon />}
+              data-allow={tagCanGoForward}
+              disabled={tagCanGoForward === false}
+              onClick={() => simService.send({ type: 'SERVICE.FOCUS.FORWARD' })}
+              variant="secondary"
+            />
+          </ButtonGroup>
           <ButtonGroup size="sm" spacing={2} isAttached>
             {showZoomButtonsInEmbed && (
               <>

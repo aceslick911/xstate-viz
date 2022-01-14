@@ -17,6 +17,26 @@
       white-space: nowrap;
     }
   }
+  & > button {
+    padding: 4px 11px;
+    position: absolute;
+    right: 0px;
+    top: -40px;
+    max-width: 220px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-all;
+    white-space: nowrap;
+    direction: rtl;
+    text-align: left;
+
+    --viz-transition-color: var(--viz-color-active);
+    display: block;
+    border-radius: 1rem;
+    background-color: var(--viz-transition-color);
+    -webkit-appearance: none;
+    appearance: none;
+  }
 }
 
 [data-viz='action-type'] {
