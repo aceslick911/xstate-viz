@@ -8,10 +8,12 @@ Visualize [XState](https://xstate.js.org) state machines and statecharts in real
 
 - Added ability to quickly jump back and forward between Actors/Machine Instances
 - Added button in invoke states to jump to the new actor when spawned
+- Public website - Use the following link to view it live
+  - Visit: [Visualizer on Vercel](http://aceslick911-xstate-viz.vercel.app/viz)
+  - Visit: [Inspect on Vercel](http://aceslick911-xstate-viz.vercel.app/viz?inspect)
 
 ### In Progress:
 
-- Public website
 - Adding websockets support
 
 ### Todo:
