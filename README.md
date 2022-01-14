@@ -4,6 +4,20 @@ Visualize [XState](https://xstate.js.org) state machines and statecharts in real
 
 [🔗 Use the Visualizer](https://stately.ai/viz).
 
+## Changes in this fork
+
+- Added ability to quickly jump back and forward between Actors/Machine Instances
+- Added button in invoke states to jump to the new actor when spawned
+
+### In Progress:
+
+- Public website
+- Adding websockets support
+
+### Todo:
+
+- Add built in websockets server
+
 ## Usage
 
 [Visit stately.ai/viz to use the Visualizer](https://stately.ai/viz).
