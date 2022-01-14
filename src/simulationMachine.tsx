@@ -31,9 +31,9 @@ export const simModel = createModel(
     jumpStack: [] as string[],
     jumpStackForward: [] as string[],
     websockSettings: {
-      server: 'localhost',
-      port: 8888,
-      protocol: 'ws' as 'ws' | 'wss',
+      server: 'xstate-viz-7qxw4g26p-aceslick911.vercel.app',
+      port: 443,
+      protocol: 'wss' as 'ws' | 'wss',
       events: [] as { client: string; msg: Object; date: Date }[],
     },
   },
