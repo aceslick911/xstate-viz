@@ -2,15 +2,15 @@
 
 Visualize [XState](https://xstate.js.org) state machines and statecharts in real-time.
 
-[🔗 Use the Visualizer](https://stately.ai/viz).
+[🔗 Use the Visualizer](https://xstate-viz.vercel.app/viz).
 
 ## Changes in this fork
 
 - Added ability to quickly jump back and forward between Actors/Machine Instances
 - Added button in invoke states to jump to the new actor when spawned
 - Public website - Use the following link to view it live
-  - Visit: [Visualizer on Vercel](http://aceslick911-xstate-viz.vercel.app/viz)
-  - Visit: [Inspect on Vercel](http://aceslick911-xstate-viz.vercel.app/viz?inspect)
+  - Visit: [Visualizer on Vercel](https://xstate-viz.vercel.app/viz)
+  - Visit: [Inspect on Vercel](https://xstate-viz.vercel.app/viz?inspect)
 
 ### In Progress:
 
@@ -22,7 +22,7 @@ Visualize [XState](https://xstate.js.org) state machines and statecharts in real
 
 ## Usage
 
-[Visit stately.ai/viz to use the Visualizer](https://stately.ai/viz).
+[Visit xstate-viz.vercel.app/viz to use the Visualizer](https://xstate-viz.vercel.app/viz).
 
 Alternatively, you can install it locally (see installation)
 
@@ -34,7 +34,7 @@ Alternatively, you can install it locally (see installation)
 - View current machine state
 - View list of events sent to the simulated machine
 - Access quick features via the command palette: <kbd>cmd</kbd>/<kbd>ctrl</kbd> + <kbd>k</kbd>
-- Inspect machines by setting `url: 'https://stately.ai/viz?inspect'` in `@xstate/inspect`
+- Inspect machines by setting `url: 'https://xstate-viz.vercel.app/viz?inspect'` in `@xstate/inspect`
 - Save your machines in the [Stately Registry](https://stately.ai/registry)
 - _And many more upcoming features_
 

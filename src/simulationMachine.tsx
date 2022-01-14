@@ -31,7 +31,7 @@ export const simModel = createModel(
     jumpStack: [] as string[],
     jumpStackForward: [] as string[],
     websockSettings: {
-      server: 'aceslick911-xstate-viz.vercel.app',
+      server: 'https://xstate-viz.vercel.app/viz?inspect',
       port: 443,
       protocol: 'wss' as 'ws' | 'wss',
       events: [] as { client: string; msg: Object; date: Date }[],
