@@ -44,6 +44,7 @@ export const CanvasView: React.FC = () => {
   const simService = useSimulation();
   const canvasService = useCanvas();
   const [sourceState] = useSourceActor();
+
   const machine = useSelector(simService, (state) => {
     return state.context.currentSessionId
       ? state.context.serviceDataMap[state.context.currentSessionId!]?.machine
@@ -92,6 +93,24 @@ export const CanvasView: React.FC = () => {
   const tagCanGoForward = useSelector(simService, (state) =>
     state.hasTag('canGoForward'),
   );
+
+  // useSelector(simService, (state) => {
+  //   console.log(
+  //     'SIM',
+  //     JSON.stringify(
+  //       {
+  //         context: {
+  //           ...state.context,
+  //           serviceDataMap: undefined,
+  //         },
+  //         tags: state.tags,
+  //         value: state.value,
+  //       },
+  //       null,
+  //       4,
+  //     ),
+  //   );
+  // });
   return (
     <Box
       display="grid"

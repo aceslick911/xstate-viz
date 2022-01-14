@@ -1,26 +1,61 @@
-import { AddIcon } from '@chakra-ui/icons';
+import {
+  AddIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+} from '@chakra-ui/icons';
+
 import {
   Box,
   Button,
+  FormLabel,
   HStack,
   IconProps,
-  Text,
+  Input,
+  Switch,
+  IconButton,
   Tooltip,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverFooter,
+  PopoverHeader,
+  Portal,
+  ButtonGroup,
+  PopoverTrigger,
+  Table,
+  Tbody,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  Td,
+  TabPanel,
 } from '@chakra-ui/react';
 import type { Monaco } from '@monaco-editor/react';
+import Editor from '@monaco-editor/react';
 import { useActor, useMachine, useSelector } from '@xstate/react';
 import { editor, Range } from 'monaco-editor';
 import dynamic from 'next/dynamic';
-import React from 'react';
-import { ActorRefFrom, assign, DoneInvokeEvent, send, spawn } from 'xstate';
+import React, { useState } from 'react';
+import {
+  ActorRefFrom,
+  assign,
+  DoneInvokeEvent,
+  send,
+  spawn,
+  SCXML,
+} from 'xstate';
 import { createModel } from 'xstate/lib/model';
+import { JSONView } from './JSONView';
 import { useAuth } from './authContext';
 import { CommandPalette } from './CommandPalette';
 import { useEmbed } from './embedContext';
 import { ForkIcon, MagicIcon, SaveIcon } from './Icons';
 import { notifMachine } from './notificationMachine';
 import { parseMachines } from './parseMachine';
-import { useSimulationMode } from './SimulationContext';
+import { useSimulation, useSimulationMode } from './SimulationContext';
 import {
   getEditorValue,
   getShouldImmediateUpdate,
@@ -29,6 +64,8 @@ import {
 } from './sourceMachine';
 import type { AnyStateMachine } from './types';
 import { getPlatformMetaKeyLabel, uniq } from './utils';
+import { toSCXMLEvent } from 'xstate/lib/utils';
+import { format } from 'date-fns';
 
 function buildGistFixupImportsText(usedXStateGistIdentifiers: string[]) {
   const rootNames: string[] = [];
@@ -369,6 +406,148 @@ const getPersistTextAndIcon = (
   }
 };
 
+const NewEvent: React.FC<{
+  onSend: (scxmlEvent: SCXML.Event<any>) => void;
+  nextEvents?: string[];
+}> = ({ onSend, nextEvents }) => {
+  // const [state, send] = useMachine(newEventMachine, {
+  //   actions: {
+  //     sendEvent: (ctx) => {
+  //       try {
+  //         const scxmlEvent = toSCXMLEvent(JSON.parse(ctx.eventString));
+
+  //         onSend(scxmlEvent);
+  //       } catch (e) {
+  //         console.error(e);
+  //       }
+  //     },
+  //   },
+  // });
+
+  return (
+    <Box
+      display="flex"
+      flexDirection="row"
+      css={{
+        gap: '.5rem', // TODO: source from Chakra
+      }}
+    >
+      <Popover>
+        {({ onClose }) => (
+          <>
+            <PopoverTrigger>
+              <Button variant="outline">Send event</Button>
+            </PopoverTrigger>
+            <Portal>
+              <PopoverContent>
+                <PopoverArrow />
+                <PopoverHeader
+                  display="flex"
+                  flexWrap="wrap"
+                  css={{
+                    gap: '.5rem',
+                  }}
+                >
+                  {nextEvents &&
+                    nextEvents.map((nextEvent) => (
+                      <Button
+                        key={nextEvent}
+                        size="xs"
+                        colorScheme="blue"
+                        onClick={
+                          () => {}
+                          // send(
+                          //   newEventModel.events['EVENT.PAYLOAD'](
+                          //     `{\n\t"type": "${nextEvent}"\n}`,
+                          //   ),
+                          // )
+                        }
+                      >
+                        {nextEvent}
+                      </Button>
+                    ))}
+                </PopoverHeader>
+                <PopoverBody bg="gray.800">
+                  <Editor
+                    language="json"
+                    options={{
+                      minimap: { enabled: false },
+                      lineNumbers: 'off',
+                      tabSize: 2,
+                    }}
+                    height="150px"
+                    width="auto"
+                    value={
+                      '1'
+                      //state.context.eventString
+                    }
+                    onChange={(text) => {
+                      // text && send(newEventModel.events['EVENT.PAYLOAD'](text));
+                    }}
+                  />
+                </PopoverBody>
+                <PopoverFooter display="flex" justifyContent="flex-end">
+                  <ButtonGroup spacing={2}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        // send(newEventModel.events['EVENT.RESET']());
+                        // onClose();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      disabled={
+                        false
+                        //  !state.hasTag('valid')
+                      }
+                      onClick={() => {
+                        // send(newEventModel.events['EVENT.SEND']());
+                        // onClose();
+                      }}
+                    >
+                      Send
+                    </Button>
+                  </ButtonGroup>
+                </PopoverFooter>
+              </PopoverContent>
+            </Portal>
+          </>
+        )}
+      </Popover>
+    </Box>
+  );
+};
+
+const EventRow: React.FC<{
+  event: { client: string; msg: Object; date: Date };
+}> = ({ event }) => {
+  const [show, setShow] = useState(false);
+
+  return (
+    <>
+      <Tr cursor="pointer" onClick={() => setShow(!show)}>
+        <Td>
+          {show ? <ChevronDownIcon /> : <ChevronRightIcon />}
+          {event.client}
+        </Td>
+        <Td color="gray.500" textAlign="right">
+          {/* <EventConnection event={event} /> */}
+        </Td>
+        <Td color="gray.500">{format(event.date, 'H:mm:ss')}</Td>
+      </Tr>
+      {show ? (
+        <Tr>
+          <Td colSpan={3}>
+            <JSONView src={event.msg} />
+          </Td>
+        </Tr>
+      ) : null}
+    </>
+  );
+};
+
 export const EditorPanel: React.FC<{
   onSave: () => void;
   onFork: () => void;
@@ -387,6 +566,7 @@ export const EditorPanel: React.FC<{
 
   const sourceOwnershipStatus = getSourceOwnershipStatus(sourceState);
 
+  const simService = useSimulation();
   const simulationMode = useSimulationMode();
 
   const persistMeta = getPersistTextAndIcon(
@@ -413,6 +593,18 @@ export const EditorPanel: React.FC<{
   });
   const isVisualizing = current.hasTag('visualizing');
 
+  const isWebsockMode = useSelector(simService, (state) =>
+    state.hasTag('websock-mode'),
+  );
+
+  const { websockSettings } = useSelector(simService, (state) => state.context);
+  console.log({ websockSettings });
+  const stickyProps = {
+    position: 'sticky',
+    top: 0,
+    backgroundColor: 'var(--chakra-colors-gray-800)',
+    zIndex: 1,
+  } as const;
   return (
     <>
       {simulationMode === 'visualizing' && (
@@ -538,7 +730,164 @@ export const EditorPanel: React.FC<{
             </HStack>
           </>
         )}
-        {simulationMode === 'inspecting' && (
+        {simulationMode === 'inspecting' && isWebsockMode ? (
+          // <Box padding="4">
+          //   <Text as="strong">Websockets Connection</Text>
+          //   <Text>
+          //     Trying to connect to {websockSettings.server} on port{' '}
+          //     {websockSettings.port}, using protocol:
+          //     {websockSettings.protocol.toUpperCase()}
+          //   </Text>
+          // </Box>
+
+          <Box
+            display="grid"
+            gridTemplateRows="0fr 0fr 1fr"
+            gridRowGap="2"
+            height="100%"
+            justifyContent="center"
+            alignItems="start"
+            style={{ marginTop: '10px' }}
+          >
+            <Box
+              display="flex"
+              justifyContent="space-evenly"
+              alignItems="center"
+            >
+              <FormLabel
+                style={{ whiteSpace: 'nowrap' }}
+                display="flex"
+                justifyContent="flex-start"
+              >
+                Websockets Server
+              </FormLabel>
+
+              <Box display="flex" justifyContent="flex-end" alignItems="center">
+                <FormLabel
+                  marginRight="auto"
+                  htmlFor="builtin-toggle"
+                  width="40%"
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  Websockets Enabled
+                </FormLabel>
+                <Switch
+                  id="builtin-toggle"
+                  defaultChecked={isWebsockMode}
+                  onChange={(e) => {
+                    // sendToEventsMachine({
+                    //   type: 'TOGGLE_BUILTIN_EVENTS',
+                    //   showBuiltins: e.target.checked,
+                    // });
+                  }}
+                />
+              </Box>
+            </Box>
+            <Box
+              display="flex"
+              justifyContent="flex-start"
+              alignItems="flex-start"
+            >
+              <FormLabel>Server</FormLabel>
+              <Input
+                placeholder="Websockets Server Host eg.localhost"
+                type="text"
+                onChange={(e) => {
+                  // sendToEventsMachine({
+                  //   type: 'FILTER_BY_KEYWORD',
+                  //   keyword: e.target.value,
+                  // });
+                }}
+                value={websockSettings.server}
+                marginRight="auto"
+                width="40%"
+              />
+              <FormLabel>PORT</FormLabel>
+              <Input
+                placeholder="Port eg.8888"
+                type="number"
+                onChange={(e) => {
+                  // sendToEventsMachine({
+                  //   type: 'FILTER_BY_KEYWORD',
+                  //   keyword: e.target.value,
+                  // });
+                }}
+                value={websockSettings.port}
+                marginRight="auto"
+                width="40%"
+              />
+            </Box>
+            <Box overflowY="auto" display="flex" justifyContent="flex-start">
+              <Table width="100%" height="100%" style={{ minHeight: '500px' }}>
+                <Thead>
+                  <Tr>
+                    <Th {...stickyProps} width="100%">
+                      Log
+                    </Th>
+                    <Th {...stickyProps}>Client</Th>
+                    <Th {...stickyProps} whiteSpace="nowrap">
+                      Time
+                      <Box
+                        display="inline-flex"
+                        flexDirection="column"
+                        verticalAlign="middle"
+                        marginLeft="1"
+                      >
+                        <IconButton
+                          aria-label="sort by timestamp descending"
+                          title="sort by timestamp descending"
+                          icon={<ChevronUpIcon />}
+                          variant="unstyled"
+                          size="xs"
+                          bg={
+                            true ? 'var(--chakra-colors-gray-700)' : undefined
+                          }
+                          onClick={() => {
+                            // sendToEventsMachine({
+                            //   type: 'SORT_BY_TIMESTAMP',
+                            //   sortCriteria: 'DESC',
+                            // });
+                          }}
+                        />
+                        <IconButton
+                          aria-label="sort by timestamp ascending"
+                          title="sort by timestamp ascending"
+                          icon={<ChevronDownIcon />}
+                          variant="unstyled"
+                          size="xs"
+                          bg={
+                            true ? 'var(--chakra-colors-gray-700)' : undefined
+                          }
+                          onClick={() => {
+                            // sendToEventsMachine({
+                            //   type: 'SORT_BY_TIMESTAMP',
+                            //   sortCriteria: 'ASC',
+                            // });
+                          }}
+                        />
+                      </Box>
+                    </Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {websockSettings.events.map((event, i) => {
+                    return <EventRow event={event} key={i} />;
+                  })}
+                </Tbody>
+              </Table>
+            </Box>
+            <NewEvent
+              onSend={
+                (event) => {}
+                //send({ type: 'SERVICE.SEND', event })
+              }
+              nextEvents={
+                []
+                //nextEvents
+              }
+            />
+          </Box>
+        ) : (
           <Box padding="4">
             <Text as="strong">Inspection mode</Text>
             <Text>

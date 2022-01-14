@@ -34,6 +34,9 @@ export const PanelsView = (props: BoxProps) => {
     embed?.isEmbedded ? calculatePanelIndexByPanelName(embed.panel) : 0,
   );
 
+  const isWebsockMode = useSelector(simService, (state) =>
+    state.hasTag('websock-mode'),
+  );
   useEffect(() => {
     if (embed?.isEmbedded) {
       setActiveTabIndex(calculatePanelIndexByPanelName(embed.panel));
@@ -60,7 +63,8 @@ export const PanelsView = (props: BoxProps) => {
         }}
       >
         <TabList>
-          <Tab>Code</Tab>
+          {isWebsockMode ? <Tab>Websocket</Tab> : <Tab>Code</Tab>}
+
           <Tab>State</Tab>
           <Tab>Events</Tab>
           <Tab>
