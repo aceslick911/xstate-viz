@@ -96,18 +96,20 @@ export const simulationMachine = simModel.createMachine(
             invoke: {
               id: 'proxy',
               src: () => (doSendBack, onReceive) => {
+                console.log('SETTING UP SOCKS');
                 const sendBack = (data: any) => {
-                  console.log('SEND', data);
+                  console.log('SENDBACK', data);
                   return doSendBack(data);
                 };
 
                 const receiver = createWebSocketReceiver({
-                  server: 'localhost:8888',
-                  protocol: 'ws',
+                  //  server: 'localhost:8888',
+                  server: 'xstate-viz-socks.herokuapp.com',
+                  //  protocol: 'ws',
                 });
 
                 onReceive((event) => {
-                  console.log('RECV', event);
+                  console.log('SEND', event);
                   if (event.type === 'xstate.event') {
                     receiver.send({
                       ...event,
@@ -118,6 +120,7 @@ export const simulationMachine = simModel.createMachine(
                 });
 
                 return receiver.subscribe((event) => {
+                  console.log('SUB', event);
                   switch (event.type) {
                     case 'service.register':
                       let state = event.machine.resolveState(event.state);
