@@ -105,7 +105,7 @@ export const simulationMachine = simModel.createMachine(
                 const receiver = createWebSocketReceiver({
                   //  server: 'localhost:8888',
                   server: 'xstate-viz-socks.herokuapp.com',
-                  //  protocol: 'ws',
+                  protocol: 'wss',
                 });
 
                 onReceive((event) => {
