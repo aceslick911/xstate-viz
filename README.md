@@ -19,6 +19,8 @@ Visualize [XState](https://xstate.js.org) state machines and statecharts in real
 ### Todo:
 
 - Add built in websockets server
+- Remote edit statemachine
+- State generator
 
 ## Usage
 
